@@ -12,62 +12,104 @@ class HomeScreen extends StatelessWidget {
         centerTitle: true,
         title: const Text('Kassenbuch'),
       ),
-      body: FormBuilder(
-        key: _formKey,
-        child: Column(
-          children: [
-            FormBuilderTextField(
-              keyboardType: TextInputType.number,
-              name: 'textField',
-            ),
-            FormBuilderSwitch(
-              name: 'entryType',
-              title: Text('Ausgabe'),
-            ),
-            FormBuilderChoiceChip(
-              name: 'entryType_chip',
-              decoration: const InputDecoration(
-                labelText: 'Select an option',
-              ),
-              options: const [
-                FormBuilderFieldOption(value: 'Einnahme', child: Text('Einnahme')),
-                FormBuilderFieldOption(value: 'Ausgabe', child: Text('Ausgabe')),
-              ],
-            ),
-            FormBuilderFilterChip(
-              name: 'choice_chip',
-              decoration: const InputDecoration(
-                labelText: 'Buchungstext',
-              ),
-              options: const [
-                FormBuilderFieldOption(value: 'Test', child: Text('schneiden')),
-                FormBuilderFieldOption(value: 'Test 1', child: Text('föhnen')),
-                FormBuilderFieldOption(value: 'Test 2', child: Text('waschen')),
-                FormBuilderFieldOption(value: 'Test 3', child: Text('färben')),
-              ],
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final textFieldData =
-                    _formKey.currentState?.fields['textField']?.value;
-                _formKey.currentState?.reset();
-                FocusScope.of(context).unfocus();
-
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    duration: const Duration(seconds: 1),
-                    content: Text(
-                      '$textFieldData',
-                      textScaleFactor: 1.5,
-                    ),
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: FormBuilder(
+          key: _formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FormBuilderTextField(
+                  keyboardType: TextInputType.number,
+                  name: 'amount',
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(
+                        borderRadius: const BorderRadius.all(
+                            const Radius.circular(10.0))),
                   ),
-                );
-              },
-              child: const Text('Submit'),
-            )
-          ],
+                ),
+                FormBuilderSwitch(
+                  initialValue: true,
+                  name: 'taking',
+                  title: Text('Einnahme'),
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(
+                        borderRadius: const BorderRadius.all(
+                            const Radius.circular(10.0))),
+                  ),
+                ),
+                FormBuilderFilterChip(
+                  name: 'bookingTextChip',
+                  decoration: const InputDecoration(
+                    labelText: 'Buchungstext',
+                  ),
+                  options: const [
+                    FormBuilderFieldOption(
+                      value: 'schneiden',
+                      child: Text('schneiden'),
+                    ),
+                    FormBuilderFieldOption(
+                      value: 'föhnen',
+                      child: Text('föhnen'),
+                    ),
+                    FormBuilderFieldOption(
+                        value: 'waschen', child: Text('waschen')),
+                    FormBuilderFieldOption(
+                      value: 'färben',
+                      child: Text('färben'),
+                    ),
+                  ],
+                ),
+                FormBuilderTextField(
+                  keyboardType: TextInputType.text,
+                  name: 'bookingText',
+                ),
+                FormBuilderTextField(
+                  keyboardType: TextInputType.number,
+                  name: 'taxRate',
+                ),
+                FormBuilderTextField(
+                  keyboardType: TextInputType.text,
+                  name: 'documentNumber',
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        _formKey.currentState?.reset();
+                      },
+                      child: const Text('Abbrechen'),
+                    ),
+                    SizedBox(
+                      width: 20.0,
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        _formKey.currentState?.save();
+                        final formData = _formKey.currentState?.value;
+                        FocusScope.of(context).unfocus();
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            duration: const Duration(seconds: 3),
+                            content: Text(
+                              '$formData',
+                              textScaleFactor: 1.0,
+                            ),
+                          ),
+                        );
+                      },
+                      child: const Text('Speichern'),
+                    )
+                  ],
+                )
+              ],
+            ),
+          ),
+          onChanged: () => print('Form has changed'),
         ),
-        onChanged: () => print('Form has changed'),
       ),
     );
   }
