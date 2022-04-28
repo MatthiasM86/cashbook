@@ -19,6 +19,7 @@ Future<void> main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext) {
     return MultiProvider(
@@ -49,7 +50,7 @@ class AuthenticationWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     final firebaseUser = context.watch<User?>();
     if (firebaseUser != null) {
-      if(firebaseUser.emailVerified){
+      if (firebaseUser.emailVerified) {
         return HomeScreen();
       } else {
         return EmailVerificationScreen();

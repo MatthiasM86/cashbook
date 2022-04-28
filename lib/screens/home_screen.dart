@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:cashbook/authentication/repositories/authentication_repository.dart';
+import 'package:provider/provider.dart';
 
 //https://www.youtube.com/watch?v=eGwq3_0K_Sg
 class HomeScreen extends StatelessWidget {
@@ -10,7 +12,7 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text('Kassenbuch'),
+        title: const Text('Neuer Eintrag'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -23,26 +25,19 @@ class HomeScreen extends StatelessWidget {
                 FormBuilderTextField(
                   keyboardType: TextInputType.number,
                   name: 'amount',
-                  decoration: InputDecoration(
-                    border: const OutlineInputBorder(
-                        borderRadius: const BorderRadius.all(
-                            const Radius.circular(10.0))),
+                  decoration: const InputDecoration(
+                    labelText: 'Betrag',
                   ),
                 ),
                 FormBuilderSwitch(
                   initialValue: true,
                   name: 'taking',
-                  title: Text('Einnahme'),
-                  decoration: InputDecoration(
-                    border: const OutlineInputBorder(
-                        borderRadius: const BorderRadius.all(
-                            const Radius.circular(10.0))),
-                  ),
+                  title: const Text('Einnahme'),
                 ),
                 FormBuilderFilterChip(
                   name: 'bookingTextChip',
                   decoration: const InputDecoration(
-                    labelText: 'Buchungstext',
+                    labelText: 'Buchungstext Schnellauswahl',
                   ),
                   options: const [
                     FormBuilderFieldOption(
@@ -64,14 +59,23 @@ class HomeScreen extends StatelessWidget {
                 FormBuilderTextField(
                   keyboardType: TextInputType.text,
                   name: 'bookingText',
+                  decoration: const InputDecoration(
+                    labelText: 'Buchungstext',
+                  ),
                 ),
                 FormBuilderTextField(
                   keyboardType: TextInputType.number,
                   name: 'taxRate',
+                  decoration: const InputDecoration(
+                    labelText: 'Steuersatz',
+                  ),
                 ),
                 FormBuilderTextField(
                   keyboardType: TextInputType.text,
                   name: 'documentNumber',
+                  decoration: const InputDecoration(
+                    labelText: 'Belegnummer',
+                  ),
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -82,7 +86,7 @@ class HomeScreen extends StatelessWidget {
                       },
                       child: const Text('Abbrechen'),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       width: 20.0,
                     ),
                     ElevatedButton(
@@ -109,6 +113,37 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
           onChanged: () => print('Form has changed'),
+        ),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
+              child: Text(
+                'Kassenbuch',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                ),
+              ),
+            ),
+            ListTile(
+              title: const Text('Item 1'),
+              onTap: () {},
+            ),
+            const Divider(),
+            ListTile(
+              title: const Text('Ausloggen'),
+              onTap: () {
+                context.read<AuthenticationRepository>().signOut();
+                Navigator.pop(context);
+              },
+            ),
+          ],
         ),
       ),
     );
