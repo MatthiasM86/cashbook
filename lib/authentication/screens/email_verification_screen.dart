@@ -13,25 +13,6 @@ class EmailVerificationScreen extends StatefulWidget {
       _EmailVerificationScreenState();
 }
 
-/*
-  EmailVerificationScreen() {
-    WidgetsBinding.instance?.addObserver(this);
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
-
-    if (state == AppLifecycleState.inactive ||
-        state == AppLifecycleState.detached) return;
-
-    final isBackground = state == AppLifecycleState.resumed;
-    if (isBackground) {
-      reloadUser = true;
-    }
-  }
-  */
-
 class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   bool reloadUser = false;
 
@@ -41,11 +22,13 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
     context.read<AuthenticationRepository>().startEmailVerificationTimer();
   }
 
+/*
   @override
   void dispose(){
     context.read<AuthenticationRepository>().stopEmailVerificationTimer();
     super.dispose();
   }
+*/
 
   @override
   Widget build(BuildContext context) {

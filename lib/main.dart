@@ -31,6 +31,10 @@ class MyApp extends StatelessWidget {
             create: (context) =>
                 context.read<AuthenticationRepository>().authStateChanges,
             initialData: null),
+        StreamProvider(
+            create: (context) =>
+                context.read<AuthenticationRepository>().isEmailVerified,
+            initialData: false)
       ],
       child: MaterialApp(
         title: 'Cashbook',
@@ -49,8 +53,9 @@ class AuthenticationWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final firebaseUser = context.watch<User?>();
+    final isEmailVerified = context.watch<bool>();
     if (firebaseUser != null) {
-      if (firebaseUser.emailVerified) {
+      if (isEmailVerified) {
         return HomeScreen();
       } else {
         return EmailVerificationScreen();

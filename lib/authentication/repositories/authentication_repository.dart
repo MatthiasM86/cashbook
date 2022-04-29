@@ -5,7 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthenticationRepository implements IAuthenticationRepository {
   final FirebaseAuth _firebaseAuth;
-  //final bool emailVerified = ;
   final _controller = StreamController<bool>();
   late Timer _timer;
 
@@ -67,12 +66,15 @@ class AuthenticationRepository implements IAuthenticationRepository {
 
   @override
   void startEmailVerificationTimer() {
+    var counter = 0;
     print('start timer');
     _timer = Timer.periodic(const Duration(seconds: 5), (timer) async {
+      counter = counter + 1;
+      print('loop ${counter}');
       final emailVerified = await forceReloadUser();
       if (emailVerified) {
         _controller.sink.add(true);
-        timer.cancel();
+        stopEmailVerificationTimer();
       } else {
         _controller.sink.add(false);
       }
@@ -81,6 +83,7 @@ class AuthenticationRepository implements IAuthenticationRepository {
 
   @override
   void stopEmailVerificationTimer() {
+    print('stop timer');
     _timer.cancel();
   }
 
