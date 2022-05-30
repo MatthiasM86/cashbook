@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:cashbook/authentication/core/auth_failures.dart';
 import 'package:cashbook/authentication/repositories/iauthentication_repository.dart';
+import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthenticationRepository implements IAuthenticationRepository {
@@ -15,39 +17,36 @@ class AuthenticationRepository implements IAuthenticationRepository {
   Stream<bool> get isEmailVerified => _controller.stream;
 
   @override
-  Future<String> signIn(String email, String password) async {
-    // Todo: change to constants
+  Future<Either<AuthFailure, Unit>> signIn(String email, String password) async {
     try {
       await _firebaseAuth.signInWithEmailAndPassword(
           email: email, password: password);
-      return "signed in";
+      return right(unit);
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        print('No user found for that email.');
-      } else if (e.code == 'wrong-password') {
-        print('Wrong password provided for that user.');
+      if (e.code == 'user-not-found' || e.code == 'wrong-password') {
+        return left(InvalidEmailAndPasswordCombinationFailure());
+      } else {
+        return left(ServerFailure());
       }
-      return "error signing in";
     }
   }
 
   @override
-  Future<String> signUp(String email, String password) async {
+  Future<Either<AuthFailure, Unit>> signUp(String email, String password) async {
     try {
       await _firebaseAuth
           .createUserWithEmailAndPassword(email: email, password: password)
           .whenComplete(() async => {await sendEmailVerification()});
-      return "signed up";
+      return right(unit);
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
-        print('The password provided is too weak.');
+        return left(WeakPasswordFailure());
       } else if (e.code == 'email-already-in-use') {
-        print('The account already exists for that email.');
+        return left(EmailAlreadyInUserFailure());
+      } else {
+        return left(ServerFailure());
       }
-    } catch (e) {
-      print(e);
     }
-    return "error sign up";
   }
 
   @override
@@ -66,11 +65,7 @@ class AuthenticationRepository implements IAuthenticationRepository {
 
   @override
   void startEmailVerificationTimer() {
-    var counter = 0;
-    print('start timer');
     _timer = Timer.periodic(const Duration(seconds: 5), (timer) async {
-      counter = counter + 1;
-      print('loop ${counter}');
       final emailVerified = await forceReloadUser();
       if (emailVerified) {
         _controller.sink.add(true);
@@ -83,8 +78,11 @@ class AuthenticationRepository implements IAuthenticationRepository {
 
   @override
   void stopEmailVerificationTimer() {
-    print('stop timer');
     _timer.cancel();
+  }
+  @override
+  User? getCurrentUser(){
+    return _firebaseAuth.currentUser;
   }
 
   //private methods

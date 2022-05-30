@@ -1,11 +1,13 @@
+import 'package:cashbook/authentication/core/auth_failures.dart';
+import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 abstract class IAuthenticationRepository {
-  //Stream<User?> authStateChanges();
-  Future<String> signIn(String email, String password);
-  Future<String> signUp(String email, String password);
+  Future<Either<AuthFailure, Unit>> signIn(String email, String password);
+  Future<Either<AuthFailure, Unit>> signUp(String email, String password);
   Future<void> signOut();
   Future<void> sendEmailVerification();
+  User? getCurrentUser();
   void startEmailVerificationTimer();
   void stopEmailVerificationTimer();
 }
