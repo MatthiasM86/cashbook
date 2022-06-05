@@ -1,11 +1,9 @@
 import 'package:cashbook/models/cashbook_entry.dart';
-import 'package:cashbook/repositories/cashbook_repsoitory.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:cashbook/authentication/repositories/authentication_repository.dart';
 import 'package:provider/provider.dart';
 
-//https://www.youtube.com/watch?v=eGwq3_0K_Sg
 class HomeScreen extends StatelessWidget {
   final _formKey = GlobalKey<FormBuilderState>();
 
@@ -106,16 +104,8 @@ class HomeScreen extends StatelessWidget {
                             ),
                           ),
                         );
-                        final userId = context.read<AuthenticationRepository>().getCurrentUser()!.uid;
-                        final cashbookEntry = prepareFormDataForSave(userId, formData!);
-                        
-                        
-                         context
-                        .read<CashbookRepository>()
-                        .addCashbookEntry(cashbookEntry);
-                        
-                          },
-                          child: const Text('Speichern'),
+                      },
+                      child: const Text('Speichern'),
                     )
                   ],
                 )
@@ -149,8 +139,7 @@ class HomeScreen extends StatelessWidget {
             ListTile(
               title: const Text('Ausloggen'),
               onTap: () {
-                context.read<AuthenticationRepository>().signOut();
-                Navigator.pop(context);
+                //todo call logout
               },
             ),
           ],
@@ -159,14 +148,11 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  CashbookEntry prepareFormDataForSave(String userId, Map<String, dynamic> formData){
-
-    final test = {
-      ...formData,
-      'userId': userId
-    };
+  CashbookEntry prepareFormDataForSave(
+      String userId, Map<String, dynamic> formData) {
+    final test = {...formData, 'userId': userId};
     final cashbookEntry = CashbookEntry.fromMap(test);
-    if(cashbookEntry.bookingText.isNotEmpty){
+    if (cashbookEntry.bookingText.isNotEmpty) {
       cashbookEntry.bookingTexts.add(cashbookEntry.bookingText);
     }
     return cashbookEntry;

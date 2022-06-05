@@ -1,35 +1,46 @@
 import 'package:bloc/bloc.dart';
+import 'package:cashbook/authentication/repositories/authentication_repository.dart';
+import 'package:dartz/dartz.dart';
 import 'package:meta/meta.dart';
+
+import '../../authentication/core/auth_failures.dart';
 
 part 'authentication_event.dart';
 part 'authentication_state.dart';
 
 class AuthenticationBloc
     extends Bloc<AuthenticationEvent, AuthenticationState> {
-  AuthenticationBloc()
+  final AuthenticationRepository authenticationRepository;
+
+  AuthenticationBloc({required this.authenticationRepository})
       : super(AuthenticationState(
-            isSubmitting: false, showValidationMessages: false)) {
-    on<SignUpWithEmailAndPasswordPressed>((event, emit) {
+            isSubmitting: false,
+            showValidationMessages: false,
+            authFailureOrSuccessOption: none())) {
+
+    on<RegisterWithEmailAndPasswordPressed>((event, emit) async {
       if (event.email == null || event.password == null) {
-        emit(AuthenticationState(
-            isSubmitting: false, showValidationMessages: true));
+        emit(state.copyWith(isSubmitting: false, showValidationMessages: true));
       } else {
-        emit(AuthenticationState(
-            isSubmitting: true, showValidationMessages: false));
-        // todo Trigger registration
-        // emit(AuthenticationState(isSubmitting: false, showValidationMessages: true));
+        emit(state.copyWith(isSubmitting: true, showValidationMessages: false));
+        final failureOrSuccess =
+            await authenticationRepository.registerWithEmailAndPassword(
+                email: event.email!, password: event.password!);
+
+        emit(state.copyWith(isSubmitting: false, authFailureOrSuccessOption: optionOf(failureOrSuccess)));
       }
     });
 
-    on<SignInWithEmailAndPasswordPressed>((event, emit) {
+    on<SignInWithEmailAndPasswordPressed>((event, emit) async {
       if (event.email == null || event.password == null) {
-        emit(AuthenticationState(
-            isSubmitting: false, showValidationMessages: true));
+        emit(state.copyWith(isSubmitting: false, showValidationMessages: true));
       } else {
-        emit(AuthenticationState(
-            isSubmitting: true, showValidationMessages: false));
-        // todo Trigger authentication
-        // emit(AuthenticationState(isSubmitting: false, showValidationMessages: true));
+        emit(state.copyWith(isSubmitting: true, showValidationMessages: false));
+        final failureOrSuccess =
+            await authenticationRepository.signInWithEmailAndPassword(
+                email: event.email!, password: event.password!);
+
+        emit(state.copyWith(isSubmitting: false, authFailureOrSuccessOption: optionOf(failureOrSuccess)));
       }
     });
   }

@@ -19,7 +19,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<AuthenticationRepository>().startEmailVerificationTimer();
+    //context.read<AuthenticationRepository>().startEmailVerificationTimer();
   }
 
 /*
@@ -42,9 +42,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                 'Dein Account ist noch nicht aktiviert, bitte klicke auf den Link in der Aktivierungsmail. Falls Du keine Email bekommen hast, kannst Du sie mit dem klick auf den Button unten erneut senden.'),
             ElevatedButton(
               onPressed: () {
-                context
-                    .read<AuthenticationRepository>()
-                    .sendEmailVerification();
+
               },
               child: Text('Aktivierungsmail erneut senden'),
             ),

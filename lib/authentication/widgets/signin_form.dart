@@ -1,4 +1,9 @@
+import 'package:auto_route/auto_route.dart';
+import 'package:cashbook/authentication/core/auth_failures.dart';
+import 'package:cashbook/authentication/screens/signup_screen.dart';
 import 'package:cashbook/bloc/authentication/authentication_bloc.dart';
+import 'package:cashbook/routes/router.gr.dart';
+import 'package:cashbook/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 //import 'package:form_builder_validators/form_builder_validators.dart';
@@ -16,13 +21,14 @@ class SignInForm extends StatelessWidget {
 
     String? validateEmail(String? input) {
       const emailRegex =
-          r"""^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~+@[a-zA-Z0-9]+\.[a-zA-Z]]+""";
+          r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+";
       if (input == null || input.isEmpty) {
         return "please enter email";
       } else if (RegExp(emailRegex).hasMatch(input)) {
         _email = input;
         return null;
       } else {
+        print("invalid email format");
         return "invalid email format";
       }
     }
@@ -38,10 +44,30 @@ class SignInForm extends StatelessWidget {
       }
     }
 
+    String mapFailureMessage(AuthFailure failure) {
+      switch (failure.runtimeType) {
+        case ServerFailure:
+          return "something went wrong";
+        case InvalidEmailAndPasswordCombinationFailure:
+          return "email or password wrong";
+        default:
+          return "something went wrong";
+      }
+    }
+
     return BlocConsumer<AuthenticationBloc, AuthenticationState>(
       listener: (context, state) {
-        // TODO: navigate to another page (homepage) if auth was success
-        // TODO: show error message if not
+        state.authFailureOrSuccessOption!.fold(
+            () => {},
+            (eitherFailureOrSuccess) => eitherFailureOrSuccess.fold((failure) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      backgroundColor: Colors.redAccent,
+                      content: Text(
+                        mapFailureMessage(failure),
+                      )));
+                }, (_) => {
+                  AutoRouter.of(context).push(const HomeScreenRoute())
+                }));
       },
       builder: (context, state) {
         return Form(
@@ -56,7 +82,7 @@ class SignInForm extends StatelessWidget {
                 decoration: const InputDecoration(
                   labelText: 'Email',
                 ),
-                validator: validatePassword,
+                validator: validateEmail,
               ),
               TextFormField(
                 keyboardType: TextInputType.text,
@@ -89,13 +115,7 @@ class SignInForm extends StatelessWidget {
                   const Text("Noch nicht registriert?"),
                   TextButton(
                     onPressed: () {
-                      /*
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => SignUpScreen()),
-                        );
-                        */
+                      //Todo Navigation to Registration Screen
                     },
                     child: const Text('Registrieren'),
                   )
