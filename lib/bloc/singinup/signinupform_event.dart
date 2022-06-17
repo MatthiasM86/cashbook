@@ -1,18 +1,22 @@
-part of 'authentication_bloc.dart';
+part of 'signinupform_bloc.dart';
 
 @immutable
-abstract class AuthenticationEvent {}
+abstract class SigninupformEvent {}
 
-class RegisterWithEmailAndPasswordPressed extends AuthenticationEvent {
+class RegisterWithEmailAndPasswordPressed extends SigninupformEvent {
   final String? email;
   final String? password;
   RegisterWithEmailAndPasswordPressed({required this.email, required this.password});
 }
 
-class SignInWithEmailAndPasswordPressed extends AuthenticationEvent {
+class SignInWithEmailAndPasswordPressed extends SigninupformEvent {
   final String? email;
   final String? password;
   SignInWithEmailAndPasswordPressed({required this.email, required this.password});
 }
 
-class SignOutPressedEvent extends AuthenticationEvent {}
+class SigninformNoAccountEventPressed extends SigninupformEvent {}
+ 
+
+
+

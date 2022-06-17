@@ -1,17 +1,11 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:cashbook/authentication/core/auth_failures.dart';
-import 'package:cashbook/authentication/screens/signup_screen.dart';
-import 'package:cashbook/bloc/authentication/authentication_bloc.dart';
+import 'package:cashbook/authentication/core/failures/auth_failures.dart';
+import 'package:cashbook/bloc/singinup/signinupform_bloc.dart';
 import 'package:cashbook/routes/router.gr.dart';
-import 'package:cashbook/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-//import 'package:form_builder_validators/form_builder_validators.dart';
-//import 'package:flutter_form_builder/flutter_form_builder.dart';
 
 class SignInForm extends StatelessWidget {
-  //const SignInForm({Key? key}) : super(key: key);
-
   late String _email;
   late String _password;
 
@@ -55,19 +49,34 @@ class SignInForm extends StatelessWidget {
       }
     }
 
-    return BlocConsumer<AuthenticationBloc, AuthenticationState>(
+    return BlocConsumer<SigninupformBloc, SigninupformState>(
       listener: (context, state) {
-        state.authFailureOrSuccessOption!.fold(
-            () => {},
-            (eitherFailureOrSuccess) => eitherFailureOrSuccess.fold((failure) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      backgroundColor: Colors.redAccent,
-                      content: Text(
-                        mapFailureMessage(failure),
-                      )));
-                }, (_) => {
-                  AutoRouter.of(context).push(const HomeScreenRoute())
-                }));
+        if (state is SigninfomrNoAccountState) {
+          AutoRouter.of(context).push(const SignUpPageRoute());
+        } else {
+          state.authFailureOrSuccessOption!.fold(
+              () => {},
+              (eitherFailureOrSuccess) =>
+                  eitherFailureOrSuccess.fold((failure) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        backgroundColor: Colors.redAccent,
+                        content: Text(
+                          mapFailureMessage(failure),
+                        )));
+                  },
+                      (_) => {
+                            if (state.isEmailVerified)
+                              {
+                                AutoRouter.of(context)
+                                    .replace(const HomePageRoute())
+                              }
+                            else
+                              {
+                                AutoRouter.of(context)
+                                    .replace(const EmailVerificationPageRoute())
+                              }
+                          }));
+        }
       },
       builder: (context, state) {
         return Form(
@@ -95,11 +104,11 @@ class SignInForm extends StatelessWidget {
               ElevatedButton(
                 onPressed: () {
                   if (formKey.currentState!.validate()) {
-                    BlocProvider.of<AuthenticationBloc>(context).add(
+                    BlocProvider.of<SigninupformBloc>(context).add(
                         SignInWithEmailAndPasswordPressed(
                             email: _email, password: _password));
                   } else {
-                    BlocProvider.of<AuthenticationBloc>(context).add(
+                    BlocProvider.of<SigninupformBloc>(context).add(
                         SignInWithEmailAndPasswordPressed(
                             email: null, password: null));
                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -115,7 +124,8 @@ class SignInForm extends StatelessWidget {
                   const Text("Noch nicht registriert?"),
                   TextButton(
                     onPressed: () {
-                      //Todo Navigation to Registration Screen
+                      BlocProvider.of<SigninupformBloc>(context)
+                          .add(SigninformNoAccountEventPressed());
                     },
                     child: const Text('Registrieren'),
                   )

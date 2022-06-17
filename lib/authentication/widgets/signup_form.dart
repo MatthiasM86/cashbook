@@ -1,7 +1,9 @@
-import 'package:cashbook/authentication/core/auth_failures.dart';
-import 'package:cashbook/bloc/authentication/authentication_bloc.dart';
+import 'package:cashbook/bloc/singinup/signinupform_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cashbook/authentication/core/failures/auth_failures.dart';
+import 'package:auto_route/auto_route.dart';
+import 'package:cashbook/routes/router.gr.dart';
 
 class SignUpForm extends StatelessWidget {
   late String _email;
@@ -13,7 +15,7 @@ class SignUpForm extends StatelessWidget {
 
     String? validateEmail(String? input) {
       const emailRegex =
-          r"""^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~+@[a-zA-Z0-9]+\.[a-zA-Z]]+""";
+          r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+";
       if (input == null || input.isEmpty) {
         return "please enter email";
       } else if (RegExp(emailRegex).hasMatch(input)) {
@@ -35,9 +37,40 @@ class SignUpForm extends StatelessWidget {
       }
     }
 
-    return BlocConsumer<AuthenticationBloc, AuthenticationState>(
+    String mapFailureMessage(AuthFailure failure) {
+      switch (failure.runtimeType) {
+        case ServerFailure:
+          return "something went wrong";
+        case InvalidEmailAndPasswordCombinationFailure:
+          return "email or password wrong";
+        default:
+          return "something went wrong";
+      }
+    }
+
+    return BlocConsumer<SigninupformBloc, SigninupformState>(
       listener: (context, state) {
-        // TODO: implement listener
+        state.authFailureOrSuccessOption!.fold(
+            () => {},
+            (eitherFailureOrSuccess) => eitherFailureOrSuccess.fold((failure) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      backgroundColor: Colors.redAccent,
+                      content: Text(
+                        mapFailureMessage(failure),
+                      )));
+                },
+                    (_) => {
+                          if (state.isEmailVerified)
+                            {
+                              AutoRouter.of(context)
+                                  .replace(const HomePageRoute())
+                            }
+                          else
+                            {
+                              AutoRouter.of(context)
+                                  .replace(const EmailVerificationPageRoute())
+                            }
+                        }));
       },
       builder: (context, state) {
         return Form(
@@ -76,11 +109,11 @@ class SignUpForm extends StatelessWidget {
                     ElevatedButton(
                       onPressed: () {
                         if (formKey.currentState!.validate()) {
-                          BlocProvider.of<AuthenticationBloc>(context).add(
+                          BlocProvider.of<SigninupformBloc>(context).add(
                               RegisterWithEmailAndPasswordPressed(
                                   email: _email, password: _password));
                         } else {
-                          BlocProvider.of<AuthenticationBloc>(context).add(
+                          BlocProvider.of<SigninupformBloc>(context).add(
                               SignInWithEmailAndPasswordPressed(
                                   email: null, password: null));
                           ScaffoldMessenger.of(context).showSnackBar(

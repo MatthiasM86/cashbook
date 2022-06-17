@@ -3,21 +3,20 @@ import 'package:cashbook/authentication/repositories/authentication_repository.d
 import 'package:dartz/dartz.dart';
 import 'package:meta/meta.dart';
 
-import '../../authentication/core/auth_failures.dart';
+import '../../authentication/core/failures/auth_failures.dart';
 
-part 'authentication_event.dart';
-part 'authentication_state.dart';
+part 'signinupform_event.dart';
+part 'signinupform_state.dart';
 
-class AuthenticationBloc
-    extends Bloc<AuthenticationEvent, AuthenticationState> {
+class SigninupformBloc extends Bloc<SigninupformEvent, SigninupformState> {
   final AuthenticationRepository authenticationRepository;
 
-  AuthenticationBloc({required this.authenticationRepository})
-      : super(AuthenticationState(
+  SigninupformBloc({required this.authenticationRepository})
+      : super(SigninupformState(
             isSubmitting: false,
             showValidationMessages: false,
+            isEmailVerified: false,
             authFailureOrSuccessOption: none())) {
-
     on<RegisterWithEmailAndPasswordPressed>((event, emit) async {
       if (event.email == null || event.password == null) {
         emit(state.copyWith(isSubmitting: false, showValidationMessages: true));
@@ -27,7 +26,10 @@ class AuthenticationBloc
             await authenticationRepository.registerWithEmailAndPassword(
                 email: event.email!, password: event.password!);
 
-        emit(state.copyWith(isSubmitting: false, authFailureOrSuccessOption: optionOf(failureOrSuccess)));
+        emit(state.copyWith(
+            isSubmitting: false,
+            isEmailVerified: false,
+            authFailureOrSuccessOption: optionOf(failureOrSuccess)));
       }
     });
 
@@ -40,8 +42,32 @@ class AuthenticationBloc
             await authenticationRepository.signInWithEmailAndPassword(
                 email: event.email!, password: event.password!);
 
-        emit(state.copyWith(isSubmitting: false, authFailureOrSuccessOption: optionOf(failureOrSuccess)));
+        if (failureOrSuccess.isRight()) {
+          final userOption = authenticationRepository.getSignedInUser();
+          userOption.fold(
+            () => {},
+            (user) => {
+              if (user.isEmailVerified)
+                {
+                  emit(state.copyWith(
+                      isSubmitting: false,
+                      isEmailVerified: true,
+                      authFailureOrSuccessOption: optionOf(failureOrSuccess)))
+                }
+            },
+          );
+        }
+
+        emit(state.copyWith(
+            isSubmitting: false,
+            authFailureOrSuccessOption: optionOf(failureOrSuccess)));
       }
     });
+
+    on<SigninformNoAccountEventPressed>((event, emit) {
+      emit(SigninfomrNoAccountState());
+    });
+
+    void test() {}
   }
 }
